@@ -16,9 +16,14 @@
 
 `SemiconDaAIR-v5` (*Semiconductor Degradation-Aware Adaptive Image Restoration*) is an ultra-lightweight, physics-guided deep neural network engineered for real-time microscopic semiconductor inspection. It addresses three simultaneous physical image degradations encountered in sub-5nm wafer die scanning:
 
-1. **Unbounded Multiplicative Speckle Noise**: Preserves signed float32 detector arrays (`[-0.2786, 2.1580]`) via dynamic inverse hyperbolic sine scaling (`RobustAsinhRangeHandler`) without lossy $[0, 1]$ clipping or blind `/255` division.
-2. **Sub-Nyquist Spatial Aliasing**: Eliminates Moiré patterns and edge ringing in fine pitch line-space arrays using a 2D Fourier Tukey cosine window filter (`TukeyWindowSmoothSpectralFilter`).
-3. **Super-Resolution ($2\times$) & Zero-Hallucination**: Upscales $128\times 128 \to 256\times 256$ (or $256\times 256 \to 512\times 512$) using low-rank expert routing and a residual fidelity-gated PixelShuffle head (`FidelityGatedHead`), guaranteeing $100\%$ structural anchoring to prevent fake defect hallucinations.
+1. **Unbounded Multiplicative Speckle Noise**:
+   Preserves signed float32 detector arrays (`[-0.2786, 2.1580]`) via dynamic inverse hyperbolic sine scaling (`RobustAsinhRangeHandler`) without lossy $[0, 1]$ clipping or blind `/255` division.
+
+2. **Sub-Nyquist Spatial Aliasing**:
+   Eliminates Moiré patterns and edge ringing in fine pitch line-space arrays using a 2D Fourier Tukey cosine window filter (`TukeyWindowSmoothSpectralFilter`).
+
+3. **Super-Resolution ($2\times$) & Zero-Hallucination**:
+   Upscales $128 \times 128 \to 256 \times 256$ (or $256 \times 256 \to 512 \times 512$) using low-rank expert routing and a residual fidelity-gated PixelShuffle head (`FidelityGatedHead`), guaranteeing $100\%$ structural anchoring to prevent fake defect hallucinations.
 
 ---
 
