@@ -1,0 +1,36 @@
+# SemiconRestorNet Configuration File
+model:
+  name: semicon_restornet
+  scale: 2
+  in_channels: 1
+  base_channels: 64
+  num_blocks: 8
+
+data:
+  clean_dir: data/clean_images
+  patch_size: 128
+  scale: 2
+  augment: true
+  num_workers: 2
+
+training:
+  epochs: 30
+  batch_size: 8
+  lr: 0.0002
+  weight_decay: 0.0001
+  use_amp: true
+  checkpoint_dir: checkpoints
+  log_dir: logs
+  seed: 42
+
+loss_weights:
+  w_charbonnier: 1.0
+  w_ms_ssim: 0.4
+  w_sobel_edge: 0.3
+  w_fourier_freq: 0.2
+  w_defect_preservation: 0.3
+
+deployment:
+  onnx_export_path: weights/semicon_restornet.onnx
+  tensorrt_engine_path: weights/semicon_restornet_fp16.engine
+  serve_port: 8000

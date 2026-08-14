@@ -1,0 +1,39 @@
+name: SemiconRestorNet CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest flake8
+
+    - name: Code Linting
+      run: |
+        flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Test Model Forward Pass & Loss Functions
+      run: |
+        python model.py
+        python losses.py
+        python metrics.py
+
+    - name: Run Synthetic Training Sanity Check
+      run: |
+        python train.py --epochs 1 --batch_size 2 --size semicon_restornet

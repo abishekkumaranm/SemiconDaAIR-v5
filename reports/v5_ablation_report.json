@@ -1,0 +1,11 @@
+{
+  "candidate_name": "SemiconDaAIR-v5",
+  "parameters": 555141,
+  "v4_baseline_psnr_db": 27.844,
+  "v5_val_psnr_db": 28.031,
+  "v5_val_ssim": 0.7448,
+  "psnr_delta_db": 0.187,
+  "v5_latency_ms": 14.41,
+  "decision": "ACCEPTED & PROMOTED TO PRODUCTION",
+  "retained_production_model": "SemiconDaAIR-v5"
+}

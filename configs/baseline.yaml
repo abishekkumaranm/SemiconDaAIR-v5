@@ -1,0 +1,16 @@
+# Baseline Configuration File
+model:
+  name: semicon_daair
+  scale: 2
+  in_channels: 1
+  base_channels: 64
+
+training:
+  epochs: 10
+  batch_size: 4
+  lr: 0.0002
+  use_amp: true
+  split_file_train: splits/train.txt
+  split_file_val: splits/val.txt
+  checkpoint_dir: checkpoints/baseline
+  log_dir: logs/baseline

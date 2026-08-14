@@ -1,0 +1,54 @@
+# SemiconDaAIR Configuration File
+model:
+  name: semicon_daair
+  in_channels: 1
+  out_channels: 1
+  base_channels: 64
+  num_blocks: 4
+  low_rank_ratio: 8
+  num_experts: 4
+  use_frequency: true
+  use_edge: true
+  use_controller: true
+  use_aux_degradation_loss: true
+  upscale: 2
+
+data:
+  clean_dir: data/clean_images
+  real_gt_dir: C:\Users\HP\Downloads\dataset\train\train\GT
+  real_lq_dir: C:\Users\HP\Downloads\dataset\train\train\NoisyLR
+  patch_size: 128
+  scale: 2
+  augment: true
+  num_workers: 0
+
+training:
+  optimizer: adamw
+  lr: 0.0002
+  weight_decay: 0.0001
+  epochs: 30
+  warmup_epochs: 5
+  batch_size: 4
+  use_amp: true
+  checkpoint_dir: checkpoints
+  log_dir: logs
+  seed: 42
+  log_interval: 30
+
+routing:
+  mode: multilabel
+  activation: sigmoid
+  lambda_deg: 0.05
+
+loss_weights:
+  charbonnier: 1.0
+  ssim: 0.15
+  edge: 0.05
+  frequency: 0.05
+  degradation: 0.05
+  lpips: 0.0
+
+deployment:
+  onnx_export_path: weights/semicon_daair.onnx
+  tensorrt_engine_path: weights/semicon_daair_fp16.engine
+  serve_port: 8000

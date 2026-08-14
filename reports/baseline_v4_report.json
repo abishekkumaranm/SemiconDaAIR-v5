@@ -1,0 +1,20 @@
+{
+  "model_name": "SemiconDaAIR-v4",
+  "checkpoint_path": "checkpoints/final/semicon_daair_v4_final.pt",
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "val_sample_count": 640,
+  "metrics": {
+    "psnr_db": 27.84401628123637,
+    "ssim": 0.7423544687859194,
+    "mae": 0.033117116558059934
+  },
+  "float32_input_range": [
+    -0.27844250202178955,
+    2.073467493057251
+  ],
+  "latency_ms": 14.321657000109553,
+  "throughput_fps": 69.82432270179005,
+  "parameters": 576709,
+  "security_check_passed": true
+}

@@ -1,0 +1,22 @@
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary Cache & Virtual Runtimes
+.cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Evaluation Outputs & Heavy Test Data Arrays (Excluded from Git push)
+outputs/
+results/
+scratch/
+logs/
+*.log
+
+# Windows OS & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

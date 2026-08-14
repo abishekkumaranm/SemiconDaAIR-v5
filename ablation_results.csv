@@ -1,0 +1,8 @@
+variant,parameters,val_psnr_db,val_ssim,val_mae,val_lpips,latency_ms,ood_psnr_db,ood_ssim
+v5 Baseline,555141,28.034,0.7448,0.0325,0.313,79.25,24.1235,0.7354
+v5 + Robust Asinh Range Handler,747834,21.5292,0.3738,0.065,0.4636,126.14,20.3381,0.3749
+v5 + Structural Guidance,747834,21.5292,0.3738,0.065,0.4636,2532.24,20.1031,0.3711
+v5 + Multi-Structural MoE,747834,21.5292,0.3738,0.065,0.4636,284.22,20.2285,0.3735
+v5 + Smooth Tukey Fourier,747834,21.5292,0.3738,0.065,0.4636,259.83,20.1857,0.3752
+v5 + Deformable Sub-Pixel Phase,747834,21.5292,0.3738,0.065,0.4636,109.37,20.3056,0.3765
+Final v6 Architecture,747834,21.5292,0.3738,0.065,0.4636,93.87,20.2055,0.3747

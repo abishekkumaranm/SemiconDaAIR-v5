@@ -1,0 +1,31 @@
+# SemiconDaAIR-v2 Experiment Configuration File
+model:
+  name: semicon_daair_v2
+  scale: 2
+  in_channels: 1
+  base_channels: 64
+  num_blocks: 4
+  low_rank_ratio: 8
+
+data:
+  real_gt_dir: C:\Users\HP\Downloads\dataset\train\train\GT
+  real_lq_dir: C:\Users\HP\Downloads\dataset\train\train\NoisyLR
+  split_file_train: splits/train.txt
+  split_file_val: splits/val.txt
+
+training:
+  epochs: 30
+  batch_size: 4
+  lr: 0.0002
+  weight_decay: 0.0001
+  use_amp: true
+  checkpoint_dir: checkpoints/exp02
+  log_dir: logs/exp02
+  seed: 42
+
+loss_weights:
+  charbonnier: 1.0
+  ssim: 0.15
+  edge: 0.05
+  frequency: 0.05
+  degradation: 0.05

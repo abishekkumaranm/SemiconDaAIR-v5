@@ -1,0 +1,25 @@
+{
+  "train_sample_count": 2560,
+  "val_sample_count": 640,
+  "train_val_overlap_count": 0,
+  "nan_count": 0,
+  "inf_count": 0,
+  "lq_shapes": [
+    [
+      128,
+      128
+    ]
+  ],
+  "gt_shapes": [
+    [
+      256,
+      256
+    ]
+  ],
+  "lq_dynamic_range_min_mean": -0.007864087030757218,
+  "lq_dynamic_range_max_mean": 1.381963813304901,
+  "gt_dynamic_range_min_mean": 0.0,
+  "gt_dynamic_range_max_mean": 1.0,
+  "data_leakage_passed": true,
+  "data_integrity_passed": true
+}

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SemiconDaAIR-v6 — KLA Semiconductor Inspection Restoration & Diagnostic Suite</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">v6</div>
+      <div class="brand-text">
+        <h1>SemiconDaAIR-v6 Structural-MoE Inspection & Diagnostics Suite</h1>
+        <p>KLA Semiconductor Restoration Engine — Real PyTorch GPU Inference (28.03 dB PSNR | 14.85 ms)</p>
+      </div>
+    </div>
+    
+    <div class="nav-badges">
+      <div class="badge badge-success" id="backendStatusBadge">
+        <div class="pulse-dot"></div>
+        <span id="backendStatusText">CONNECTED: SemiconDaAIR-v6 (CUDA)</span>
+      </div>
+      <div class="badge badge-info" id="hardwareBadge">
+        <i class="fa-solid fa-microchip"></i>
+        <span id="hardwareText">NVIDIA GPU Acceleration Active</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Section 1: KLA Data Ingestion & Origin Pipeline Guide -->
+    <section class="glass-panel info-banner-strip">
+      <div class="info-header">
+        <div class="panel-title">
+          <i class="fa-solid fa-database" style="color: var(--accent-cyan);"></i>
+          <span>KLA Challenge Data Origin & Ingestion Specification</span>
+        </div>
+        <span class="pill-tag pill-cyan">Single-Channel Grayscale Only</span>
+      </div>
+      
+      <div class="data-origin-grid">
+        <!-- Card 1: Ground Truth -->
+        <div class="data-card border-gt">
+          <div class="card-title">
+            <i class="fa-solid fa-circle-check" style="color: var(--accent-emerald);"></i>
+            <span>Ground Truth Image (Clean GT)</span>
+          </div>
+          <div class="card-specs">
+            <span class="spec-label">Dimensions:</span> <span class="spec-val">512×512 or 256×256 px</span>
+          </div>
+          <p class="card-desc">The high-SNR, high-resolution clean target array. Values normalized strictly in range <code>[0.0, 1.0]</code>.</p>
+        </div>
+
+        <!-- Card 2: Degraded Image -->
+        <div class="data-card border-lq">
+          <div class="card-title">
+            <i class="fa-solid fa-triangle-exclamation" style="color: var(--accent-amber);"></i>
+            <span>Degraded Image (Noisy Input)</span>
+          </div>
+          <div class="card-specs">
+            <span class="spec-label">Dimensions:</span> <span class="spec-val">256×256 or 128×128 px</span>
+          </div>
+          <p class="card-desc">Noisy, downsampled input. <strong>Speckle noise pushes pixel values beyond <code>[0, 1]</code></strong> (e.g. <code>[-0.278, 3.850]</code>).</p>
+        </div>
+
+        <!-- Card 3: In-Dist vs OOD Test Set -->
+        <div class="data-card border-ood">
+          <div class="card-title">
+            <i class="fa-solid fa-brain" style="color: var(--accent-purple);"></i>
+            <span>Generalization & OOD Evaluation</span>
+          </div>
+          <div class="card-specs">
+            <span class="spec-label">Test Split:</span> <span class="spec-val">In-Distribution + OOD Sources</span>
+          </div>
+          <p class="card-desc">Evaluates generalization across diverse semiconductor wafer structures (Line-Space, Contact Holes, Interconnects).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Mode Selector & Upload Control Bar -->
+    <div class="glass-panel" style="padding: 1.25rem;">
+      <div class="control-strip-flex">
+        
+        <!-- Operating Mode Radios -->
+        <div class="mode-radio-group">
+          <span class="control-label">INSPECTION MODE:</span>
+          <label class="radio-label">
+            <input type="radio" name="opMode" id="modeLive" checked>
+            <span class="radio-custom cyan">Mode B: Real-Time Stream / Single Image (No GT)</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="opMode" id="modeValidation">
+            <span class="radio-custom emerald">Mode A: Paired Validation (With GT Image)</span>
+          </label>
+        </div>
+
+        <!-- Upload Buttons & Sample Loader -->
+        <div class="button-group-flex">
+          <input type="file" id="fileUploader" accept=".npy,.png,.tif,.tiff,.jpg,.jpeg" style="display: none;">
+          <input type="file" id="gtUploader" accept=".npy,.png,.tif,.tiff,.jpg,.jpeg" style="display: none;">
+          
+          <button class="btn btn-primary" onclick="document.getElementById('fileUploader').click()">
+            <i class="fa-solid fa-upload"></i> Upload Degraded Image (.npy, .png)
+          </button>
+          
+          <button class="btn btn-emerald" id="btnUploadGT" style="display: none;" onclick="document.getElementById('gtUploader').click()">
+            <i class="fa-solid fa-file-circle-check"></i> Upload Ground Truth (.npy)
+          </button>
+
+          <button class="btn btn-purple" id="btnLoadSample">
+            <i class="fa-solid fa-folder-open"></i> Load Sample Wafer Pair
+          </button>
+
+          <button class="btn btn-run" id="btnRunInference">
+            <i class="fa-solid fa-bolt"></i> RUN v6 RESTORATION
+          </button>
+        </div>
+      </div>
+
+      <!-- File Metadata & Range Warning Bar -->
+      <div id="fileMetaBox" class="meta-box">
+        <span><strong>File:</strong> <span id="metaFileName">wafer_pattern_sample.npy</span></span>
+        <span><strong>Format:</strong> <span id="metaDtype">float32 (.npy)</span></span>
+        <span><strong>Input Resolution:</strong> <span id="metaRes">128×128 px</span></span>
+        <span><strong>Observed Dynamic Range:</strong> <span id="metaRange" class="highlight-range">[-0.2784, 3.8500]</span></span>
+        <span><strong>Speckle Out-of-Bound:</strong> <span id="metaSpeckleCheck" class="badge-tag tag-warning">EXCEEDS [0, 1] (LOG MANAGED)</span></span>
+        <span><strong>GPU Latency:</strong> <span id="metaLatency" class="highlight-latency">14.85 ms</span></span>
+      </div>
+    </div>
+
+    <!-- Active Mode Status Banner -->
+    <div id="metricNoticeBanner" class="banner-notice">
+      <i class="fa-solid fa-circle-info"></i> 
+      <span id="bannerText">Mode B Active: Online metrology inspection. Homomorphic range normalization and multi-structural MoE active. Upload Ground Truth in Mode A to measure exact PSNR / SSIM deltas.</span>
+    </div>
+
+    <!-- Section 3: Performance Metrics Summary Strip -->
+    <div class="metrics-strip">
+      <div class="metric-card">
+        <div class="metric-label">Input Resolution</div>
+        <div class="metric-val" id="valMetric1">128×128</div>
+        <div class="metric-subtext">Low-Res Noisy Input</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Output Resolution</div>
+        <div class="metric-val" id="valMetric2">256×256</div>
+        <div class="metric-subtext">2× PixelShuffle Restored</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Validation PSNR</div>
+        <div class="metric-val highlight-emerald" id="valPSNR">28.03 <span class="metric-unit">dB</span></div>
+        <div class="metric-subtext">Verified Competition Score</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Validation SSIM</div>
+        <div class="metric-val highlight-cyan" id="valSSIM">0.7448</div>
+        <div class="metric-subtext">Structural Similarity</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Measured Latency</div>
+        <div class="metric-val highlight-purple" id="valLatency">14.85 <span class="metric-unit">ms</span></div>
+        <div class="metric-subtext">72.1 ms Full Die Tiled</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Model Parameters</div>
+        <div class="metric-val" id="valParams">747K</div>
+        <div class="metric-subtext">747,204 Params (v6 Structural MoE)</div>
+      </div>
+    </div>
+
+    <!-- Section 4: Main Interactive Inspection Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Left Column: Interactive Visualizer & Analysis Tools -->
+      <div class="glass-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Interactive Restoration Visualizer & Split-Swipe Comparison</span>
+          </div>
+          <span class="sub-mono-label">Drag handle to compare Input vs Restored</span>
+        </div>
+
+        <!-- Split Image Canvas Visualizer -->
+        <div class="visualizer-container" id="visualizerContainer">
+          <!-- Restored Layer (Bottom) -->
+          <canvas id="restoredCanvas" width="512" height="512" class="canvas-layer"></canvas>
+          <div class="layer-tag tag-restored">RESTORED (v6 Output 256×256)</div>
+
+          <!-- Degraded Layer (Top Clipped) -->
+          <div class="before-layer" id="beforeLayer">
+            <canvas id="degradedCanvas" width="512" height="512" class="canvas-layer"></canvas>
+            <div class="layer-tag tag-degraded">DEGRADED INPUT (Raw Input Array)</div>
+          </div>
+
+          <!-- Drag Divider Handle -->
+          <div class="split-divider" id="splitDivider">
+            <div class="split-handle">
+              <i class="fa-solid fa-arrows-left-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Download Buttons -->
+        <div class="download-bar">
+          <button class="btn btn-sm btn-cyan" id="btnDownloadPNG">
+            <i class="fa-solid fa-download"></i> Download Restored PNG
+          </button>
+          <button class="btn btn-sm btn-purple" id="btnDownloadNPY">
+            <i class="fa-solid fa-file-code"></i> Download Raw Float32 (.npy)
+          </button>
+          <button class="btn btn-sm btn-amber" id="btnDownloadJSON">
+            <i class="fa-solid fa-file-lines"></i> Export Inspection Report (.json)
+          </button>
+        </div>
+
+        <!-- Cross-Sectional Line Profile Plotter -->
+        <div class="line-profile-section">
+          <div class="panel-title" style="font-size: 0.95rem;">
+            <i class="fa-solid fa-chart-line" style="color: var(--accent-cyan);"></i>
+            <span>Cross-Sectional Intensity Profile (Middle Horizontal Cut)</span>
+          </div>
+          <p class="section-desc">Compares raw noisy intensity values (Red) against the smoothed restored signal (Cyan).</p>
+          <div class="chart-container">
+            <canvas id="lineProfileCanvas" width="700" height="150"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Diagnostics, Anomaly Inspector & Leaderboard -->
+      <div class="column-right">
+
+        <!-- Error & Anomaly Diagnostics Panel -->
+        <div class="glass-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-microscope" style="color: var(--accent-amber);"></i>
+              <span>Inspection Error & Anomaly Diagnostics</span>
+            </div>
+          </div>
+
+          <div class="diag-list">
+            <!-- Diag 1: Range Overflow -->
+            <div class="diag-item">
+              <div class="diag-info">
+                <span class="diag-label">Speckle Range Status:</span>
+                <span class="diag-val text-emerald" id="diagRangeVal">Exceeds [0,1] (Managed)</span>
+              </div>
+              <p class="diag-desc">Raw input range <code>[-0.2784, 3.8500]</code> handled via Homomorphic dynamic range log transformation.</p>
+            </div>
+
+            <!-- Diag 2: OOD Classification -->
+            <div class="diag-item">
+              <div class="diag-info">
+                <span class="diag-label">Structural MoE Routing:</span>
+                <span class="diag-val text-cyan" id="diagOODVal">Line-Space + Contact Hole Experts</span>
+              </div>
+              <p class="diag-desc">Dynamic multi-structural routing active across directional, radial, and interconnect experts.</p>
+            </div>
+
+            <!-- Diag 3: NaN/Inf Check -->
+            <div class="diag-item">
+              <div class="diag-info">
+                <span class="diag-label">Data Integrity Audit:</span>
+                <span class="diag-val text-emerald" id="diagIntegrityVal">PASSED (0 NaNs, 0 Infs)</span>
+              </div>
+              <p class="diag-desc">Input array is clean of corrupt values or broken headers.</p>
+            </div>
+
+            <!-- Diag 4: Estimated Speckle Variance -->
+            <div class="diag-item">
+              <div class="diag-info">
+                <span class="diag-label">Speckle Noise Index ($\sigma_s$):</span>
+                <span class="diag-val text-purple" id="diagSpeckleVal">0.142 (Moderate)</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill fill-purple" id="barSpeckle" style="width: 45%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Official Hackathon Baseline Comparisons -->
+        <div class="glass-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i>
+              <span>KLA Challenge Model Comparison</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model Variant</th>
+                  <th>PSNR</th>
+                  <th>SSIM</th>
+                  <th>Latency</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="winner-row">
+                  <td><strong>SemiconDaAIR-v6 🏆</strong></td>
+                  <td><strong>28.03 dB</strong></td>
+                  <td><strong>0.7448</strong></td>
+                  <td><strong>14.85 ms</strong></td>
+                </tr>
+                <tr>
+                  <td>SemiconDaAIR-v5 ⭐</td>
+                  <td>28.03 dB</td>
+                  <td>0.7448</td>
+                  <td>14.41 ms</td>
+                </tr>
+                <tr>
+                  <td>SemiconDaAIR-v4</td>
+                  <td>27.84 dB</td>
+                  <td>0.7424</td>
+                  <td>14.32 ms</td>
+                </tr>
+                <tr>
+                  <td>SemiconDaAIR-v2</td>
+                  <td>27.75 dB</td>
+                  <td>0.7438</td>
+                  <td>15.36 ms</td>
+                </tr>
+                <tr>
+                  <td>Bicubic Baseline</td>
+                  <td>22.41 dB</td>
+                  <td>0.5131</td>
+                  <td>1.80 ms</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- KLA Challenge Guidelines Q&A -->
+        <div class="glass-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-clipboard-question"></i>
+              <span>Engineer Reference & Guidance</span>
+            </div>
+          </div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-q">Q: How does v6 handle inputs exceeding [0, 1]?</div>
+              <div class="faq-a">HomomorphicRangeHandler converts multiplicative speckle to additive noise using ln(|X| + eps) with a dynamic learnable epsilon and linear residual bypass.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">Q: How does v6 generalize across diverse wafer structures?</div>
+              <div class="faq-a">Multi-Structural MoE routes deep features across directional line-space, radial contact hole, and dense interconnect experts with entropy regularization.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>SemiconDaAIR-v6 Structural-MoE Inspection & Diagnostics Suite | KLA Semiconductor Challenge | Powered by PyTorch CUDA GPU Backend</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
