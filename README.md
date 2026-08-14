@@ -68,22 +68,29 @@
 
 ### 1️⃣ `RobustAsinhRangeHandler` (Unbounded Dynamic Range Safety)
 Operates on the true signed floating-point detector curve without lossy data truncation:
-$$f_{\text{asinh}}(X) = \operatorname{asinh}\left(\frac{X}{s}\right) = \ln\left(\frac{X}{s} + \sqrt{\left(\frac{X}{s}\right)^2 + 1}\right)$$
+
+$$f_{\text{asinh}}(X) = \sinh^{-1}\left(\frac{X}{s}\right) = \ln\left(\frac{X}{s} + \sqrt{\left(\frac{X}{s}\right)^2 + 1}\right)$$
+
 - Guarantees **0 NaNs / 0 Infs** across all out-of-bounds sensor spikes (`[-0.2786, 2.1580]`).
 
 ### 2️⃣ `SpeckleAwareBranch` & `DegradationRouter`
 Converts multiplicative speckle into an additive Gaussian domain using signed log-transform:
-$$X_{\text{log}} = \operatorname{sign}(X) \cdot \ln(|X| + \epsilon)$$
-Feature channels are dynamically dispatched across 4 specialized neural experts (`Gaussian`, `Speckle`, `Resolution`, `Shared`).
+
+$$X_{\text{log}} = \text{sign}(X) \cdot \ln(|X| + \epsilon)$$
+
+- Feature channels are dynamically dispatched across 4 specialized neural experts (`Gaussian`, `Speckle`, `Resolution`, `Shared`).
 
 ### 3️⃣ `TukeyWindowSmoothSpectralFilter` (Spatial Frequency Guidance)
 Applies a 2D Tukey cosine window mask $W_{\text{Tukey}}$ in Fast Fourier Transform ($\text{FFT2D}$) space:
+
 $$\mathcal{F}_{\text{filtered}}(u,v) = \mathcal{F}(X) \cdot W_{\text{Tukey}}(u,v, \alpha)$$
-Eliminates Moiré aliasing patterns and sharpens sub-5nm STI fin line-space edges.
+
+- Eliminates Moiré aliasing patterns and sharpens sub-5nm STI fin line-space edges.
 
 ### 4️⃣ `FidelityGatedHead` (Zero-Hallucination Safety Gate)
 Anchors low-frequency wafer structure to the real input tensor, preventing AI from inventing fake defects:
-$$Y_{\text{HR}} = \operatorname{Bilinear}_{2\times}(X_{\text{LQ}}) + C(x,y) \cdot R(x,y)$$
+
+$$Y_{\text{HR}} = \text{Bilinear}_{2\times}(X_{\text{LQ}}) + C(x,y) \cdot R(x,y)$$
 
 ---
 
