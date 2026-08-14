@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🏆 SemiconDaAIR-v5: AI-Based Restoration of Degraded Images for Semiconductor Metrology
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -189,3 +190,6 @@ NaN / Inf Status        : PASS (0 NaNs / 0 Infs)
 ## 📜 License & Compliance
 
 This repository is built for the **KLA / SEMICON India Hackathon 2026 (`i4C PS01`)**. All model architectures, trained weights, scripts, and documentation comply 100% with official challenge guidelines.
+=======
+# SemiconDaAIR-v5
+>>>>>>> e003f46a6febcbcfb9a86ea691bab95352295529
