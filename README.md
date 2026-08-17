@@ -1,4 +1,4 @@
-# 🏆 TEAM JIT — SemiconDaAIR-v5: AI-Based Restoration of Degraded Images for Semiconductor Metrology
+# TEAM JIT — SemiconDaAIR-v5: AI-Based Restoration of Degraded Images for Semiconductor Metrology
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch 2.11](https://img.shields.io/badge/PyTorch-2.11+cu128-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
@@ -29,11 +29,11 @@
 
 ---
 
-## 🚀 How to Run (Official KLA Submission Contract)
+## 🚀 How to Run
 
 Open your terminal inside the project directory (`C:\Users\HP\OneDrive\Documents\hackthan_nit`) and execute any of these verified commands:
 
-### 1️⃣ Official KLA Submission Command (`run.py`)
+### 1️⃣ Official Submission Command (`run.py`)
 Official command required by KLA reviewers:
 ```bash
 python run.py <input-dir> <output-dir>
@@ -72,7 +72,7 @@ To analyze how `SemiconDaAIR-v5` compares against standard baselines (U-Net, DnC
 
 ### 📊 1. Head-to-Head Feature Comparison Matrix
 
-| Feature / Metric | Standard Baseline (U-Net / DnCNN) | Heavy Transformer Baseline (SwinIR / Restormer) | 🏆 Our Solution (`SemiconDaAIR-v5`) | Key Architectural Advantage |
+| Feature / Metric | Standard Baseline (U-Net / DnCNN) | Heavy Transformer Baseline (SwinIR / Restormer) | Our Solution (`SemiconDaAIR-v5`) | Key Architectural Advantage |
 | :--- | :---: | :---: | :---: | :--- |
 | **Inference Time (H100 GPU)** | ~25 ms – 45 ms | ~150 ms – 300 ms (Slow) | ⚡ **`< 5.0 ms` (1,000+ FPS)** | Bottleneck SSM + Tukey Spectral Filter removes costly GELU & heavy multi-head self-attention bottlenecks. |
 | **Speckle Intensity Spikes** | Fails (clipping causes loss of detail) | Partial (global min-max normalization) | ⚡ **`RobustAsinhRangeHandler`** | Operates on signed float32 detector arrays (`[-0.2786, 2.1580]`) via $\text{asinh}(X/s)$ without lossy $[0,1]$ clipping. |
