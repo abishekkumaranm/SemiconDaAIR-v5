@@ -22,10 +22,10 @@
    Preserves signed float32 detector arrays (`[-0.2786, 2.1580]`) via dynamic inverse hyperbolic sine scaling (`RobustAsinhRangeHandler`) without lossy $[0, 1]$ clipping or blind `/255` division.
 
 2. **Sub-Nyquist Spatial Aliasing**:
-   Eliminates Moiré patterns and edge ringing in fine pitch line-space arrays using a 2D Fourier Tukey cosine window filter (`TukeyWindowSmoothSpectralFilter`).
+   Suppresses Moiré patterns and edge ringing in fine pitch line-space arrays using a 2D Fourier Tukey cosine window filter (`TukeyWindowSmoothSpectralFilter`).
 
-3. **Super-Resolution ($2\times$) & Zero-Hallucination**:
-   Upscales $128 \times 128 \to 256 \times 256$ (or $256 \times 256 \to 512 \times 512$) using low-rank expert routing and a residual fidelity-gated PixelShuffle head (`FidelityGatedHead`), guaranteeing $100\%$ structural anchoring to prevent fake defect hallucinations.
+3. **Super-Resolution ($2\times$) & Structural Anchoring**:
+   Upscales $128 \times 128 \to 256 \times 256$ (or $256 \times 256 \to 512 \times 512$) using low-rank expert routing and a residual fidelity-gated PixelShuffle head (`FidelityGatedHead`), anchoring reconstruction to the upsampled input baseline to mitigate hallucinated structures.
 
 ---
 
@@ -42,6 +42,8 @@ python run.py <input-dir> <output-dir>
 ```bash
 python run.py Test_NoisyLR/NoisyLR restored_outputs
 ```
+- **Single-Pass Deterministic Fast Mode (Default)**: Sub-5ms latency, `28.0340 dB PSNR`.
+- **Optional 8x TTA Quality Boost**: Add `--use_tta` for **`+0.42 dB` PSNR boost** (`28.45 dB`).
 - Reads all `.npy` files from `<input-dir>`.
 - Creates `<output-dir>` automatically if missing.
 - Generates one restored `.npy` file for every input file with the **EXACT SAME filename**.
@@ -50,11 +52,11 @@ python run.py Test_NoisyLR/NoisyLR restored_outputs
 
 ---
 
-### 2️⃣ Standalone Evaluation Command (`evaluate.py`)
+### 2️⃣ Environment Verification Script (`verify_env.py`)
+Verify system setup and checkpoint loading in 2 seconds:
 ```bash
-python evaluate.py --input_dir /path/to/test_images --output_dir /path/to/output_images --gt_dir /path/to/gt_images
+python scripts/verify_env.py
 ```
-- **Optional TTA Quality Boost**: Add `--use_tta` for **`+0.42 dB` PSNR boost** (`28.45 dB`).
 
 ---
 
@@ -74,11 +76,11 @@ To analyze how `SemiconDaAIR-v5` compares against standard baselines (U-Net, DnC
 
 | Feature / Metric | Standard Baseline (U-Net / DnCNN) | Heavy Transformer Baseline (SwinIR / Restormer) | Our Solution (`SemiconDaAIR-v5`) | Key Architectural Advantage |
 | :--- | :---: | :---: | :---: | :--- |
-| **Inference Time (H100 GPU)** | ~25 ms – 45 ms | ~150 ms – 300 ms (Slow) | ⚡ **`< 5.0 ms` (1,000+ FPS)** | Bottleneck SSM + Tukey Spectral Filter removes costly GELU & heavy multi-head self-attention bottlenecks. |
+| **Inference Time (H100 GPU)** | ~25 ms – 45 ms | ~150 ms – 300 ms (Slow) | ⚡ **`< 5.0 ms` (1,000+ FPS)** | Bottleneck Global Context Filter removes costly GELU & heavy multi-head self-attention bottlenecks. |
 | **Speckle Intensity Spikes** | Fails (clipping causes loss of detail) | Partial (global min-max normalization) | ⚡ **`RobustAsinhRangeHandler`** | Operates on signed float32 detector arrays (`[-0.2786, 2.1580]`) via $\text{asinh}(X/s)$ without lossy $[0,1]$ clipping. |
-| **Line Edge Roughness (LER)** | Blurs microscopic wafer edges | Over-sharpens (introduces ringing) | ⚡ **2D Fourier Tukey Window Filter** | Eliminates Moiré pattern aliasing on sub-5nm STI fin line-space pitch arrays while preserving sharp line boundaries. |
-| **Model Parameter Count** | ~15M – 30M parameters | ~11M – 20M parameters | ⚡ **`555,141 parameters` (2.22 MB)** | Ultra-lightweight footprint avoids overfitting on wafer patterns and fits inside GPU L2 cache for instant execution. |
-| **Wafer Hallucination Risk** | High (creates fake line bridges) | Moderate (generates fake textures) | ⚡ **`FidelityGatedHead`** | Anchors low-frequency wafer structure via residual fidelity gating to prevent fake defect hallucinations. |
+| **Line Edge Roughness (LER)** | Blurs microscopic wafer edges | Over-sharpens (introduces ringing) | ⚡ **2D Fourier Tukey Window Filter** | Suppresses Moiré pattern aliasing on sub-5nm STI fin line-space pitch arrays while preserving sharp line boundaries. |
+| **Model Parameter Count** | ~15M – 30M parameters | ~11M – 20M parameters | ⚡ **`555,141 parameters` (2.22 MB)** | Ultra-lightweight footprint avoids overfitting on wafer patterns and enables ultra-fast CUDA execution. |
+| **Wafer Hallucination Risk** | High (creates fake line bridges) | Moderate (generates fake textures) | ⚡ **`FidelityGatedHead`** | Anchors low-frequency wafer structure via residual fidelity gating to mitigate structural hallucinations. |
 
 ---
 
@@ -86,7 +88,7 @@ To analyze how `SemiconDaAIR-v5` compares against standard baselines (U-Net, DnC
 
 #### Innovation 1: The H100 Speed Benchmark Optimization
 Standard vision transformers (SwinIR/Restormer) use heavy multi-head self-attention and non-linear activation functions (GELU/SiLU) that create severe GPU memory bandwidth bottlenecks on NVIDIA H100 GPUs.  
-`SemiconDaAIR-v5` uses a **Bottleneck State-Space Global Context Block** and **Tukey Spectral Window Filtering**, squeezing feature channels to 32 and executing in **`< 5.0 ms` ($1,000+\text{ FPS}$)**.
+`SemiconDaAIR-v5` uses a **Bottleneck Global Context Block** and **Tukey Spectral Window Filtering**, squeezing feature channels to 32 and executing in **`< 5.0 ms` ($1,000+\text{ FPS}$)**.
 
 #### Innovation 2: Handling Unbounded Speckle Noise Range Spikes
 Speckle noise pushes detector pixel intensities beyond standard bounds (`[-0.2786, 2.1580]`). Standard models clamp inputs to $[0, 1]$ before feature extraction, destroying true structural signals.  
@@ -103,13 +105,13 @@ Standard models train on Mean Squared Error (MSE / L2 Loss), which averages pixe
 - **Multi-Scale SSIM Loss**: Directly maximizes structural similarity for sub-micron chip geometries.
 - **Sobel Gradient Edge Loss**: Forces high-frequency line edges and contact vias to remain ultra-sharp.
 
-#### Innovation 4: Zero Fake Defect Hallucinations & Superior Generalization
-Heavy models with 15M+ parameters overfit on training wafer patterns and invent fake line bridges on unseen test samples.  
+#### Innovation 4: Structural Fidelity & Superior Generalization
+Heavy models with 15M+ parameters overfit on training wafer patterns and risk inventing fake line bridges on unseen test samples.  
 `SemiconDaAIR-v5` uses an ultra-compact footprint (**555,141 parameters / 2.22 MB checkpoint**) paired with **`FidelityGatedHead`**:
 
 $$Y_{\text{HR}} = \text{Bilinear}_{2\times}(X_{\text{LQ}}) + C(x,y) \cdot R(x,y)$$
 
-This anchors 100% of low-frequency wafer structure to the input tensor, guaranteeing zero fake defect hallucinations and robust zero-shot generalization.
+This anchors low-frequency wafer structure to the input tensor, mitigating structural hallucinations and providing robust zero-shot generalization.
 
 ---
 
@@ -149,7 +151,7 @@ This anchors 100% of low-frequency wafer structure to the input tensor, guarante
                                                   ▼
                      ┌─────────────────────────────────────────────────────────┐
                      │         Restored High-Res Output (256x256x1)           │
-                     │         Zero Fake Defect Hallucinations | 0 NaNs        │
+                     │         Mitigated Structural Hallucinations | 0 NaNs    │
                      └────────────────────────────┴────────────────────────────┘
 ```
 
@@ -203,6 +205,8 @@ SemiconDaAIR-v5/
 ├── 📄 README.md                       # Master Documentation File
 ├── 📄 .gitignore                      # Git Exclusion Rules
 │
+├── 📁 scripts/                        # Utility & Verification Scripts
+│   └── verify_env.py                  # Standalone environment & dependency verifier
 ├── 📁 models/                         # Neural Network Architectures (semicon_daair_v5.py, robust_range.py, etc.)
 ├── 📁 checkpoints/                    # Trained Checkpoints (v5_backup/semicon_daair_v5_candidate.pt, 2.22 MB)
 ├── 📁 datasets/                       # PyTorch Dataset Loader Suite

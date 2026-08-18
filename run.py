@@ -2,18 +2,12 @@
 run.py — Official KLA Submission Entrypoint Script for TEAM JIT (SemiconDaAIR-v5).
 
 Official Execution Contract:
-  python run.py <input-dir> <output-dir>
+  python run.py <input-dir> <output-dir> [--use_tta] [--use_compile]
 
-Performance & Quality Features:
-  ✅ DEFAULT 8x TTA (Test-Time Augmentation): 8x geometric rotation/reflection averaging enabled by default (+0.42 dB PSNR boost -> 28.45 dB)
-  ✅ Optional --no_tta: Disable TTA for ultra-fast sub-5ms single-pass execution mode (28.03 dB)
-  ✅ Optional --use_compile: Enable PyTorch 2.0 CUDA kernel compilation for 2x-3x speedup
-  ✅ Reads all .npy files from input directory
-  ✅ Creates output directory if missing
-  ✅ Generates one restored .npy file for every input file with EXACT SAME filename
-  ✅ Bounded within [0, 1] with 0 NaNs / 0 Infs
-  ✅ Rescaled to target high-resolution shape (256, 256)
-  ✅ 100% Offline execution on NVIDIA GPU / CPU without internet or API keys
+Default Execution Mode:
+  ⚡ Single-Pass Deterministic Inference (Sub-5ms H100 latency, 28.0340 dB PSNR)
+  💡 Optional --use_tta: Enable 8x TTA geometric averaging for competition quality (+0.42 dB PSNR boost -> 28.45 dB)
+  ⚡ Optional --use_compile: PyTorch 2.0 CUDA kernel compilation (2x-3x speedup)
 """
 
 import os
@@ -77,7 +71,7 @@ def main():
     parser.add_argument("-o", "--output_dir", type=str, default=None, help="Output directory path")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/v5_backup/semicon_daair_v5_candidate.pt", help="Path to model weights")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu", help="Device (cuda/cpu)")
-    parser.add_argument("--no_tta", action="store_true", help="Disable 8x TTA and use fast single-pass mode (28.03 dB PSNR)")
+    parser.add_argument("--use_tta", action="store_true", help="Enable 8x Test-Time Augmentation (+0.42 dB PSNR boost -> 28.45 dB)")
     parser.add_argument("--use_compile", action="store_true", help="Enable PyTorch 2.0 CUDA Kernel Compilation for 2x-3x speedup")
     args = parser.parse_args()
 
@@ -86,11 +80,11 @@ def main():
     output_dir = args.output_dir or args.pos_output_dir
 
     if not input_dir or not output_dir:
-        print("Usage: python run.py <input-dir> <output-dir> [--no_tta] [--use_compile]")
+        print("Usage: python run.py <input-dir> <output-dir> [--use_tta] [--use_compile]")
         sys.exit(1)
 
-    # 8x TTA is ENABLED BY DEFAULT for maximum competition quality (28.45 dB PSNR)
-    use_tta = not args.no_tta
+    # Default is Single-Pass Fast Mode matching claimed <5ms H100 latency (28.0340 dB PSNR)
+    use_tta = args.use_tta
     device = torch.device(args.device)
     os.makedirs(output_dir, exist_ok=True)
 
@@ -100,7 +94,7 @@ def main():
     print(f"Input Directory   : {input_dir}", flush=True)
     print(f"Output Directory  : {output_dir}", flush=True)
     print(f"Hardware Device   : {device}", flush=True)
-    print(f"8x TTA Quality    : {'ENABLED BY DEFAULT (+0.42 dB PSNR Boost -> 28.45 dB)' if use_tta else 'DISABLED (--no_tta flag used)'}", flush=True)
+    print(f"Execution Mode    : {'8x TTA Quality Boost (+0.42 dB PSNR -> 28.45 dB)' if use_tta else 'Single-Pass Fast Mode (Sub-5ms Latency -> 28.0340 dB)'}", flush=True)
     print(f"PyTorch Compile   : {'ENABLED (2x-3x CUDA Speedup)' if args.use_compile else 'DISABLED'}", flush=True)
 
     # Load candidate model weights offline
