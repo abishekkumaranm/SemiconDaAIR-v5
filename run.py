@@ -25,7 +25,7 @@ from models.semicon_daair_v5 import build_semicon_daair_v5
 
 
 def load_input_array(fpath: str) -> np.ndarray:
-    """Loads input array preserving signed float32 dynamic range."""
+    """Loads input array preserving signed float32 dynamic range across 2D and 3D shapes."""
     ext = os.path.splitext(fpath)[1].lower()
     if ext == ".npy":
         arr = np.load(fpath).astype(np.float32)
@@ -33,6 +33,9 @@ def load_input_array(fpath: str) -> np.ndarray:
             arr = arr[0]
         elif arr.ndim == 3 and arr.shape[2] == 1:
             arr = arr.squeeze(2)
+        elif arr.ndim == 3 and arr.shape[0] == 3:
+            # Grayscale fallback for 3-channel RGB arrays
+            arr = 0.2989 * arr[0] + 0.5870 * arr[1] + 0.1140 * arr[2]
         return arr
     elif ext in [".png", ".tif", ".tiff", ".jpg", ".jpeg"]:
         img = Image.open(fpath).convert("L")
@@ -129,9 +132,12 @@ def main():
 
     model.eval()
 
-    # Discover all input files (.npy and standard images)
+    # Discover all input files (.npy and standard images), ignoring subdirectories
     supported_exts = (".npy", ".png", ".tif", ".tiff", ".jpg", ".jpeg")
-    all_files = [f for f in os.listdir(input_dir) if f.lower().endswith(supported_exts) and not f.startswith("._")]
+    all_files = [
+        f for f in os.listdir(input_dir)
+        if os.path.isfile(os.path.join(input_dir, f)) and f.lower().endswith(supported_exts) and not f.startswith("._")
+    ]
     all_files.sort()
 
     print(f"Found {len(all_files)} input samples to process.", flush=True)
