@@ -29,6 +29,27 @@
 
 ---
 
+## 🧪 Quick Start & Clean Environment Verification (4 Steps)
+
+A reviewer can clone and execute inference on any clean environment without contacting the authors:
+
+```bash
+# Step 1 — Clone the repository
+git clone https://github.com/abishekkumaranm/SemiconDaAIR-v5.git
+cd SemiconDaAIR-v5
+
+# Step 2 — Install dependencies
+pip install -r requirements.txt
+
+# Step 3 — Verify environment & model checkpoint (Optional 2-second check)
+python scripts/verify_env.py
+
+# Step 4 — Run inference (AS-IS, no edits required)
+python run.py tests/sample_input test_outputs
+```
+
+---
+
 ## 🚀 How to Run
 
 Open your terminal inside the project directory (`C:\Users\HP\OneDrive\Documents\hackthan_nit`) and execute any of these verified commands:
